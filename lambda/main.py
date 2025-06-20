@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 SLACK_BOT_TOKEN = os.environ['SLACK_BOT_TOKEN']
 SLACK_CHANNEL_ID = os.environ['SLACK_CHANNEL_ID']
 SNS_TOPIC_ARN = os.environ['SNS_TOPIC_ARN']
-BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'amazon.titan-text-lite-v1')
+BEDROCK_MODEL_ID = os.environ.get('BEDROCK_MODEL_ID', 'us.amazon.nova-micro-v1:0')
 
 # --- AWSサービスクライアント ---
 slack_client = WebClient(token=SLACK_BOT_TOKEN)
