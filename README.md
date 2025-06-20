@@ -1,7 +1,5 @@
 # Slack分析バッチ on AWS
 
-東京大学松尾研究室AIエンジニアリング講義の最終課題で作成しました。
-
 このプロジェクトは、AWSのサーバーレスアーキテクチャを利用して、指定されたSlackチャンネルの会話を毎日自動で分析し、レポートを通知するバッチアプリケーションです。
 
 ## 概要
@@ -63,4 +61,4 @@ Slackの特定チャンネルにおける過去24時間分の投稿を取得し�
 -   `SLACK_BOT_TOKEN`: Slack APIを呼び出すためのボットトークン。
 -   `SLACK_CHANNEL_ID`: 分析対象のSlackチャンネルID。
 -   `SNS_TOPIC_ARN`: 通知を送る先のSNSトピック。CDKによって自動で設定されます。
--   `BEDROCK_MODEL_ID`: 分析に使用するBedrockのモデルID。デフォルトは`amazon.titan-text-lite-v1`です。
+-   `BEDROCK_MODEL_ID`: 分析に使用するBedrockのモデルID。デフォルトは`us.amazon.nova-micro-v1:0`です。
