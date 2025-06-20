@@ -25,7 +25,7 @@ export class SlackAnalyzerStack extends cdk.Stack {
         SLACK_BOT_TOKEN: 'YOUR_SLACK_BOT_TOKEN', // ここは後でLambdaの環境変数で設定
         SLACK_CHANNEL_ID: 'YOUR_SLACK_CHANNEL_ID',
         SNS_TOPIC_ARN: topic.topicArn,
-        BEDROCK_MODEL_ID: 'amazon.titan-text-lite-v1' // 使用するモデル
+        BEDROCK_MODEL_ID: 'us.amazon.nova-lite-v1:0' // 使用するモデル
       }
     });
 
