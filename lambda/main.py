@@ -17,14 +17,13 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """BedrockのモデルをMessages API形式で呼び出す (最終修正版)"""
+    """BedrockのモデルをMessages API形式で呼び出す (最終確定版)"""
     try:
         model_id_to_use = os.environ.get('BEDROCK_MODEL_ID')
 
-        # エラーメッセージが要求している 'messages' キーを含んだリクエストボディ
+        # 'max_tokens' を削除した最終的なリクエストボディ
         body = json.dumps({
             "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 4096,
             "messages": [
                 {
                     "role": "user",
