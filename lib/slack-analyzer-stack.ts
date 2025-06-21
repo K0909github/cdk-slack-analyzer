@@ -5,7 +5,7 @@ import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as sns from 'aws-cdk-lib/aws-sns';
-import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
+//import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 
 export class SlackAnalyzerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -15,17 +15,16 @@ export class SlackAnalyzerStack extends cdk.Stack {
     const topic = new sns.Topic(this, 'SlackReportTopic');
 
     // --- 2. Lambda関数を定義 ---
-    const slackAnalyzerFunction = new PythonFunction(this, 'SlackAnalyzerFunction', {
-      entry: 'lambda', // Lambdaのコードが置かれているディレクトリ
+    const slackAnalyzerFunction = new lambda.Function(this, 'SlackAnalyzerFunction', {
       runtime: lambda.Runtime.PYTHON_3_11,
-      index: 'main.py', // 実行するファイル
-      handler: 'lambda_handler', // 実行する関数
-      timeout: cdk.Duration.minutes(15), // タイムアウトを15分に設定
+      handler: 'main.lambda_handler', // ファイル名.関数名
+      code: lambda.Code.fromAsset('lambda'), // 'lambda'フォルダをソースコードとして指定
+      timeout: cdk.Duration.minutes(15),
       environment: {
-        SLACK_BOT_TOKEN: 'YOUR_SLACK_BOT_TOKEN', // ここは後でLambdaの環境変数で設定
+        SLACK_BOT_TOKEN: 'YOUR_SLACK_BOT_TOKEN',
         SLACK_CHANNEL_ID: 'YOUR_SLACK_CHANNEL_ID',
         SNS_TOPIC_ARN: topic.topicArn,
-        BEDROCK_MODEL_ID: 'us.amazon.nova-lite-v1:0' // 使用するモデル
+        BEDROCK_MODEL_ID: 'us.amazon.nova-micro-v1:0'
       }
     });
 
