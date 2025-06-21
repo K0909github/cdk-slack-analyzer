@@ -14,6 +14,15 @@ export class SlackAnalyzerStack extends cdk.Stack {
     // --- 1. 通知用のSNSトピックを作成 ---
     const topic = new sns.Topic(this, 'SlackReportTopic');
 
+    // トピックポリシーを修正し、同じアカウント内の全てのIAMユーザーが購読できるようにする
+    topic.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.AccountPrincipal(cdk.Stack.of(this).account)],
+      actions: ['SNS:Subscribe'],
+      resources: [topic.topicArn],
+    }));
+
+
     // --- 2. Lambda関数を定義 ---
     const slackAnalyzerFunction = new lambda.Function(this, 'SlackAnalyzerFunction', {
       runtime: lambda.Runtime.PYTHON_3_11,
