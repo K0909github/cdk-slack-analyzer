@@ -17,35 +17,40 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """BedrockのTitanモデル（Novaを含む）を呼び出す"""
+    """BedrockのモデルをMessages API形式で呼び出す (最終修正版)"""
     try:
-        # Titanモデルが期待するリクエストボディ
-        body = json.dumps({
-            "inputText": prompt,
-            "textGenerationConfig": {
-                "maxTokenCount": 4096,
-                "stopSequences": [],
-                "temperature": 0.7,
-                "topP": 0.9
-            }
-        })
+        model_id_to_use = os.environ.get('BEDROCK_MODEL_ID')
 
-        # デバッグ用にリクエストボディをログに出力
-        print(f"Request body for Bedrock: {body}")
+        # エラーメッセージが要求している 'messages' キーを含んだリクエストボディ
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 4096,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt
+                        }
+                    ]
+                }
+            ]
+        })
 
         # モデルを呼び出し
         response = bedrock_runtime.invoke_model(
-            body=body,
-            modelId=os.environ.get('BEDROCK_MODEL_ID')
+            body=body, 
+            modelId=model_id_to_use
         )
 
         # レスポンスをパース
         response_body = json.loads(response.get('body').read())
-        return response_body.get('results')[0].get('outputText')
+        return response_body.get('content')[0].get('text')
 
     except Exception as e:
         print(f"Bedrock Error: {e}")
-        return "Bedrockの呼び出しに失敗しました。モデルIDとリクエスト形式、モデルアクセス権限を確認してください。"
+        return "Bedrockの呼び出しに失敗しました。"
         
         # モデルを呼び出し
         response = bedrock_runtime.invoke_model(body=body, modelId=BEDROCK_MODEL_ID)
