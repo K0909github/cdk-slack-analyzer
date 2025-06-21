@@ -17,12 +17,27 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """Bedrockのモデルを呼び出す"""
+    """Bedrockのモデルを呼び出す（Messages API形式）"""
     try:
-        body = json.dumps({"inputText": prompt})
+        # 新しいMessages APIの形式に合わせたリクエストボディを作成
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 2048,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}]
+                }
+            ]
+        })
+        
+        # モデルを呼び出し
         response = bedrock_runtime.invoke_model(body=body, modelId=BEDROCK_MODEL_ID)
+        
+        # レスポンスをパースしてテキスト部分を抽出
         response_body = json.loads(response.get('body').read())
-        return response_body.get('results')[0].get('outputText')
+        return response_body.get('content')[0].get('text')
+        
     except Exception as e:
         print(f"Bedrock Error: {e}")
         return "Bedrockの呼び出しに失敗しました。"
