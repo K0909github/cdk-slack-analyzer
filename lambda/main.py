@@ -17,39 +17,28 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """Bedrockのモデルを呼び出し、Titanモデルの応答を正しく解釈する"""
+    """BedrockのTitanモデルをsimplechatの形式で呼び出す"""
     try:
         model_id_to_use = os.environ.get('BEDROCK_MODEL_ID')
 
-       
+        # simplechatで使われている形式（inputTextのみを持つ最もシンプルな形式）
         body = json.dumps({
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "text": prompt
-                        }
-                    ]
-                }
-            ]
+            "inputText": prompt
         })
 
         # モデルを呼び出し
         response = bedrock_runtime.invoke_model(
             body=body,
-            modelId=model_id_to_use
+            modelId=model_id_to_use,
+            accept='application/json',
+            contentType='application/json'
         )
-        
+
         # レスポンスをパース
-        response_body = json.loads(response.get('body').read())
+        response_body = json.loads(response['body'].read())
         
-        # Titanモデルの応答形式 (resultsキー) に合わせて結果を抽出
-        results = response_body.get('results', [])
-        if results:
-            return results[0].get('outputText', '応答テキストが見つかりませんでした。')
-        
-        return "モデルからの応答が空でした。（レスポンス形式不一致）"
+        # simplechatと同様の形式で結果を抽出
+        return response_body.get('results')[0].get('outputText')
 
     except Exception as e:
         print(f"Bedrock Error: {e}")
