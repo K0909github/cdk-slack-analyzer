@@ -17,29 +17,35 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """Bedrockのモデルを呼び出す（Titanモデルの正しい形式）"""
+    """BedrockのTitanモデル（Novaを含む）を呼び出す"""
     try:
-        # Titanモデルが期待する正しいリクエストボディを作成
+        # Titanモデルが期待するリクエストボディ
         body = json.dumps({
             "inputText": prompt,
             "textGenerationConfig": {
-                "maxTokenCount": 2048,
+                "maxTokenCount": 4096,
                 "stopSequences": [],
                 "temperature": 0.7,
                 "topP": 0.9
             }
         })
-        
+
+        # デバッグ用にリクエストボディをログに出力
+        print(f"Request body for Bedrock: {body}")
+
         # モデルを呼び出し
-        response = bedrock_runtime.invoke_model(body=body, modelId=BEDROCK_MODEL_ID)
-        
-        # レスポンスをパースしてテキスト部分を抽出
+        response = bedrock_runtime.invoke_model(
+            body=body,
+            modelId=os.environ.get('BEDROCK_MODEL_ID')
+        )
+
+        # レスポンスをパース
         response_body = json.loads(response.get('body').read())
         return response_body.get('results')[0].get('outputText')
 
     except Exception as e:
         print(f"Bedrock Error: {e}")
-        return "Bedrockの呼び出しに失敗しました。"
+        return "Bedrockの呼び出しに失敗しました。モデルIDとリクエスト形式、モデルアクセス権限を確認してください。"
         
         # モデルを呼び出し
         response = bedrock_runtime.invoke_model(body=body, modelId=BEDROCK_MODEL_ID)
