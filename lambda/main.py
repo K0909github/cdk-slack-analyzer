@@ -21,9 +21,8 @@ def invoke_bedrock(prompt: str) -> str:
     try:
         model_id_to_use = os.environ.get('BEDROCK_MODEL_ID')
 
-        # 'max_tokens' を削除した最終的なリクエストボディ
+        # エラーが出たキーを全て取り除き、'messages'キーのみを持つリクエストボディ
         body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
             "messages": [
                 {
                     "role": "user",
@@ -39,13 +38,18 @@ def invoke_bedrock(prompt: str) -> str:
 
         # モデルを呼び出し
         response = bedrock_runtime.invoke_model(
-            body=body, 
+            body=body,
             modelId=model_id_to_use
         )
 
         # レスポンスをパース
         response_body = json.loads(response.get('body').read())
-        return response_body.get('content')[0].get('text')
+        # レスポンスの形式も 'content' から変更される可能性を考慮し、より安全なget()を使用
+        content_list = response_body.get('content', [])
+        if content_list:
+            return content_list[0].get('text', '')
+        return "モデルからの応答が空でした。"
+
 
     except Exception as e:
         print(f"Bedrock Error: {e}")
