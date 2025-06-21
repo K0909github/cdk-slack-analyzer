@@ -17,18 +17,17 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """BedrockのモデルをMessages API形式で呼び出す (最終確定版)"""
+    """BedrockのモデルをMessages API形式で呼び出す (真・最終確定版)"""
     try:
         model_id_to_use = os.environ.get('BEDROCK_MODEL_ID')
 
-        # エラーが出たキーを全て取り除き、'messages'キーのみを持つリクエストボディ
+        # 'type'キーを取り除いた、最終的なリクエストボディ
         body = json.dumps({
             "messages": [
                 {
                     "role": "user",
                     "content": [
                         {
-                            "type": "text",
                             "text": prompt
                         }
                     ]
@@ -44,24 +43,12 @@ def invoke_bedrock(prompt: str) -> str:
 
         # レスポンスをパース
         response_body = json.loads(response.get('body').read())
-        # レスポンスの形式も 'content' から変更される可能性を考慮し、より安全なget()を使用
         content_list = response_body.get('content', [])
         if content_list:
             return content_list[0].get('text', '')
         return "モデルからの応答が空でした。"
 
 
-    except Exception as e:
-        print(f"Bedrock Error: {e}")
-        return "Bedrockの呼び出しに失敗しました。"
-        
-        # モデルを呼び出し
-        response = bedrock_runtime.invoke_model(body=body, modelId=BEDROCK_MODEL_ID)
-        
-        # レスポンスをパースしてテキスト部分を抽出
-        response_body = json.loads(response.get('body').read())
-        return response_body.get('content')[0].get('text')
-        
     except Exception as e:
         print(f"Bedrock Error: {e}")
         return "Bedrockの呼び出しに失敗しました。"
