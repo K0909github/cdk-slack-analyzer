@@ -17,11 +17,11 @@ bedrock_runtime = boto3.client('bedrock-runtime')
 sns_client = boto3.client('sns')
 
 def invoke_bedrock(prompt: str) -> str:
-    """BedrockのモデルをMessages API形式で呼び出す (真・最終確定版)"""
+    """Bedrockのモデルを呼び出し、Titanモデルの応答を正しく解釈する"""
     try:
         model_id_to_use = os.environ.get('BEDROCK_MODEL_ID')
 
-        # 'type'キーを取り除いた、最終的なリクエストボディ
+       
         body = json.dumps({
             "messages": [
                 {
@@ -40,14 +40,16 @@ def invoke_bedrock(prompt: str) -> str:
             body=body,
             modelId=model_id_to_use
         )
-
+        
         # レスポンスをパース
         response_body = json.loads(response.get('body').read())
-        content_list = response_body.get('content', [])
-        if content_list:
-            return content_list[0].get('text', '')
-        return "モデルからの応答が空でした。"
-
+        
+        # Titanモデルの応答形式 (resultsキー) に合わせて結果を抽出
+        results = response_body.get('results', [])
+        if results:
+            return results[0].get('outputText', '応答テキストが見つかりませんでした。')
+        
+        return "モデルからの応答が空でした。（レスポンス形式不一致）"
 
     except Exception as e:
         print(f"Bedrock Error: {e}")
